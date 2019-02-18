@@ -1,0 +1,15 @@
+name:          fac-workshop
+version:       0.0.0
+cabal-version: >= 1.8
+build-type:    Simple
+
+executable          fac-workshop
+    hs-source-dirs: .
+    main-is:        Main.hs
+    ghc-options:    -threaded -O2 -rtsopts -with-rtsopts=-N
+    extensions:     OverloadedStrings
+    build-depends:  aeson
+                  , base
+                  , containers
+                  , scotty
+                  , text

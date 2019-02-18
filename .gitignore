@@ -1,0 +1,8 @@
+*.hi
+*.keter
+*.o
+*.swp
+.DS_Store
+.cabal-sandbox
+.stack-work/
+cabal.sandbox.config
