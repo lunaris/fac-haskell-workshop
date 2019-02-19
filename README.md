@@ -270,7 +270,7 @@ free to use the `square` function in your implementation if you wish.
 ```
 *Main> quadratic 3 4 5 6
 137
-*Main> 3 2 5 3
+*Main> quadratic 3 2 5 3
 38
 ```
 
@@ -280,8 +280,8 @@ factorial. The factorial of a number `N` is defined _recursively_ thus:
 * The factorial of `0` is `1`.
 * The factorial of a number `N` is `N` multiplied by the factorial of `N - 1`.
 
-Thus `factorial 3 == 6`, `factorial 5 == 120` and so on. You don't have to worry
-about negative inputs.
+Thus `factorial n` == `n * (n - 1) * (n - 2) * ... * 1` -- `factorial 3 == 6`,
+`factorial 5 == 120` and so on. You don't have to worry about negative inputs.
 
 ```
 *Main> factorial 3
