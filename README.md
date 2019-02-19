@@ -255,9 +255,24 @@ use of another function (here the `(*)` operator).
 *Exercise*: Write a function `square` which takes an `Int` and returns its
 square.
 
+```
+*Main> square 4
+16
+*Main> square 14
+196
+```
+
 *Exercise*: Write a function `quadratic` which computes the result of quadratic
 polynomials of the form `ax^2 + bx + c`. Your function should take `Int`s
-representing `a`, `b`, `c` and `x` and return the result (also an `Int`).
+representing `a`, `b`, `c` and `x` and return the result (also an `Int`). Feel
+free to use the `square` function in your implementation if you wish.
+
+```
+*Main> quadratic 3 4 5 6
+137
+*Main> 3 2 5 3
+38
+```
 
 *Exercise*: Write a function `factorial` which takes an `Int` and computes its
 factorial. The factorial of a number `N` is defined _recursively_ thus:
@@ -267,5 +282,77 @@ factorial. The factorial of a number `N` is defined _recursively_ thus:
 
 Thus `factorial 3 == 6`, `factorial 5 == 120` and so on. You don't have to worry
 about negative inputs.
+
+```
+*Main> factorial 3
+6
+*Main> factorial 5
+120
+*Main> factorial 0
+1
+```
+
+---
+
+
+
+---
+
+*Exercise*: `fst` and `snd` only work on pairs. Write functions `fst3`, `snd3`
+that retrieve the first and second elements of a triple, and functions `thd4`
+and `fth4` that retrieve the third and fourth elements of a 4-tuple. All these
+functions should work no matter what the types of the tuple elements.
+
+```
+*Main> fst3 ('a', False, "hello")
+'a'
+*Main> snd3 (False, True, 3)
+True
+*Main> thd4 ('a', "b", False, True)
+False
+*Main> fth4 (10, "twenty", True, 'z')
+'z'
+```
+
+---
+
+
+
+---
+
+*Exercise*: Write a function `null`, which takes a list of values of _any type_
+and returns `True` if and only if the list is empty.
+
+```
+*Main> null []
+True
+*Main> null [1,2,3]
+False
+*Main> null "abc"
+False
+*Main> null ""
+True
+```
+
+*Exercise*: Write a function `tail`, which takes a list of values of _any type_
+and returns the list without its first element if it is non-empty and the empty
+list if it is empty.
+
+```
+*Main> tail "hello"
+"ello"
+*Main> tail []
+[]
+*Main> tail [1..10]
+[2,3,4,5,6,7,8,9,10]
+```
+
+---
+
+
+
+---
+
+*Exercise*: Write a function `filter`
 
 ---
