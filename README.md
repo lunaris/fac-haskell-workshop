@@ -252,7 +252,7 @@ use of another function (here the `(*)` operator).
 
 ---
 
-*Exercise*: Write a function `square` which takes an `Int` and returns its
+**Exercise**: Write a function `square` which takes an `Int` and returns its
 square (another `Int`).
 
 ```
@@ -273,7 +273,7 @@ Ok, one module loaded.
 If there are errors in your code, GHCi will let you know and refuse to reload
 the module until you fix them.
 
-*Exercise*: Write a function `quadratic` which computes the result of quadratic
+**Exercise**: Write a function `quadratic` which computes the result of quadratic
 polynomials of the form `ax^2 + bx + c`. Your function should take `Int`s
 representing `a`, `b`, `c` and `x` and return the result (also an `Int`). Feel
 free to use the `square` function in your implementation if you wish.
@@ -285,7 +285,7 @@ free to use the `square` function in your implementation if you wish.
 38
 ```
 
-*Exercise*: Write a function `factorial` which takes an `Int` and computes its
+**Exercise**: Write a function `factorial` which takes an `Int` and computes its
 factorial (another `Int`). The factorial of a number `N` is defined
 _recursively_ thus:
 
@@ -410,12 +410,12 @@ an `Int`".
 
 ---
 
-*Exercise*: `(==)` and `(/=)` are also polymorphic -- observe that you can do
+**Exercise**: `(==)` and `(/=)` are also polymorphic -- observe that you can do
 both `False == True` and `'c' == 'd'` with the same function, for instance. What
 are the types of `(==)` and `(/=)`? What is the name of the constraint required
 to use them?
 
-*Exercise*: `fst` and `snd` only work on pairs. Write functions `fst3`, `snd3`
+**Exercise**: `fst` and `snd` only work on pairs. Write functions `fst3`, `snd3`
 that retrieve the first and second elements of a triple, and functions `thd4`
 and `fth4` that retrieve the third and fourth elements of a 4-tuple. All these
 functions should be polymorphic and work no matter what the types of the tuple
@@ -438,7 +438,7 @@ False
 
 ---
 
-*Exercise*: Write a function `null`, which takes a list of values of _any type_
+**Exercise**: Write a function `null`, which takes a list of values of _any type_
 and returns `True` if and only if the list is empty.
 
 ```
@@ -452,7 +452,7 @@ False
 True
 ```
 
-*Exercise*: Write a function `tail`, which takes a list of values of _any type_
+**Exercise**: Write a function `tail`, which takes a list of values of _any type_
 and returns the list without its first element if it is non-empty and the empty
 list if it is empty.
 
@@ -471,7 +471,7 @@ list if it is empty.
 
 ---
 
-*Exercise*: Write a function `filter`, which takes a predicate over some type
+**Exercise**: Write a function `filter`, which takes a predicate over some type
 and a list of values of that type and returns the list of elements that satisfy
 that predicate.
 
