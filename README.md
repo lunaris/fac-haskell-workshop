@@ -253,7 +253,7 @@ use of another function (here the `(*)` operator).
 ---
 
 *Exercise*: Write a function `square` which takes an `Int` and returns its
-square.
+square (another `Int`).
 
 ```
 *Main> square 4
@@ -261,6 +261,17 @@ square.
 *Main> square 14
 196
 ```
+
+Note that when you save changes to your code, you will have to tell GHCi to
+_reload_ it. You can do this using the `:r` (or `:reload` in full) command:
+
+```
+*Main> :r
+Ok, one module loaded.
+```
+
+If there are errors in your code, GHCi will let you know and refuse to reload
+the module until you fix them.
 
 *Exercise*: Write a function `quadratic` which computes the result of quadratic
 polynomials of the form `ax^2 + bx + c`. Your function should take `Int`s
@@ -275,7 +286,8 @@ free to use the `square` function in your implementation if you wish.
 ```
 
 *Exercise*: Write a function `factorial` which takes an `Int` and computes its
-factorial. The factorial of a number `N` is defined _recursively_ thus:
+factorial (another `Int`). The factorial of a number `N` is defined
+_recursively_ thus:
 
 * The factorial of `0` is `1`.
 * The factorial of a number `N` is `N` multiplied by the factorial of `N - 1`.
@@ -294,14 +306,120 @@ Thus `factorial n` == `n * (n - 1) * (n - 2) * ... * 1` -- `factorial 3 == 6`,
 
 ---
 
+Unlike JavaScript, Haskell distinguishes between whole numbers (3, 6,
+242852592295, etc.) and _floating point_ numbers (e.g. 3.14159, 0.1337, etc.).
+You've dealt with `Int`s, which is one type for working with the former, but
+Haskell has types like `Float` and `Double` too, which work with the latter. For
+instance, you might write a variant of your `square` function, `squareFloat`,
+that operates on `Float`s instead of `Int`s:
 
+```
+squareFloat :: Float -> Float
+squareFloat x = x * x
+```
+
+This works as we expect:
+
+```
+*Main> squareFloat 3.0
+9.0
+*Main> squareFloat 4.5
+20.25
+```
+
+Note however that we can't use `square` to square a `Float`, even those `square`
+and `squareFloat` have identical bodies:
+
+```
+*Main> square 4.5
+
+<interactive>:13:8: error:
+    * No instance for (Fractional Int) arising from the literal `4.5'
+    * In the first argument of `square', namely `4.5'
+      In the expression: square 4.5
+      In an equation for `it': it = square 4.5
+```
+
+GHCi complains that `square` is only defined on `Int`s but that a fractional
+value (the literal `4.5`) has been passed to it instead -- a type error. We
+already have a work-around of course---the `squareFloat` function---but it
+seems a shame that we can't use a single function with both types.
+
+Indeed, this dramatic build-up has a satisfying conclusion -- Haskell supports
+_ad-hoc polymorphism_, in which a single function can be used with many types.
+To see how, remove the type signature from your definition of `square`:
+
+```
+square x = x * x
+```
+
+This will still compile, but GHC will _infer_ the type for you. Brilliantly, it
+will infer the most general type, which you can see by reloading and asking
+GHCi:
+
+```
+*Main> :r
+*Main> :t square
+square :: Num a => a -> a
+```
+
+Observe that the type has been changed in two ways:
+
+* The type `Int -> Int` has changed to become `a -> a`
+* There is a new component, `Num a =>`
+
+The new type `a` is a _type variable_. Like a variable in your code, it can
+represent a number of things (here types). So you can read the type `a -> a` as
+"takes some type, call it `a`, and returns a value of the same type".
+
+The prefix `Num a =>` is called a _constraint_. It says that "while `a` is 'some
+type', it can't be _any_ type -- it has to be a type that _satisfies the `Num`
+constraint_". The `Num` constraint says that values of type `a` can be treated
+"like numbers" e.g. having additions like `+`, `*` and `-`. Indeed, if you ask
+GHCi what the type of the `+` function is (you'll need to wrap it in parentheses
+so that it's not treated as an infix operator):
+
+```
+*Main> :t (+)
+(+) :: Num a => a -> a -> a
+```
+
+So `(+)` "takes a value of some type `a` (which satisfies `Num`) and another
+value of the same type, and returns a value of that type (presumably the sum of
+the first two values)".
+
+Type variables like `a` don't _have_ to be constrained -- there are functions
+that really do work _for any type_ `a`. Take the humble identity function, which
+just returns its argument:
+
+```
+id :: a -> a
+id x = x
+```
+
+`id` works on values of _any_ type -- numbers, characters, booleans, you name
+it! Another very general function you've already seen is `length`, which returns
+the length of a list. Check out its type:
+
+```
+length :: [a] -> Int
+```
+
+This says that `length` "takes a list of values of _any type_, `a`, and returns
+an `Int`".
 
 ---
+
+*Exercise*: `(==)` and `(/=)` are also polymorphic -- observe that you can do
+both `False == True` and `'c' == 'd'` with the same function, for instance. What
+are the types of `(==)` and `(/=)`? What is the name of the constraint required
+to use them?
 
 *Exercise*: `fst` and `snd` only work on pairs. Write functions `fst3`, `snd3`
 that retrieve the first and second elements of a triple, and functions `thd4`
 and `fth4` that retrieve the third and fourth elements of a 4-tuple. All these
-functions should work no matter what the types of the tuple elements.
+functions should be polymorphic and work no matter what the types of the tuple
+elements.
 
 ```
 *Main> fst3 ('a', False, "hello")
@@ -353,6 +471,15 @@ list if it is empty.
 
 ---
 
-*Exercise*: Write a function `filter`
+*Exercise*: Write a function `filter`, which takes a predicate over some type
+and a list of values of that type and returns the list of elements that satisfy
+that predicate.
+
+```
+*Main> filter even [1..10]
+[2,4,6,8,10]
+*Main> filter (> 4) [3,5,9,1,4,2,6]
+[5,9,6]
+```
 
 ---
