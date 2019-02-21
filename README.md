@@ -830,3 +830,58 @@ Nothing
 ---
 
 ### Something more real-world
+
+OK, this is kind of cool, but can you actually _do_ anything with it? Yes,
+definitely, but given the scope of this workshop it's going to get a bit
+hand-wavey (though you are free to make a more rigourous journey independently).
+In this section we'll spin up a simple HTTP API/web server, using a Haskell
+library called `scotty` which behaves a bit like Express (JavaScript) or Sinatra
+(Ruby), if you've ever played with those.
+
+Haskell programs begin from a function called `main`. Here we've set up `main`
+to create a little web server listening on port 6060:
+
+```
+scotty 6060 $ do
+  ...
+```
+
+The `do`-block is a subset of Haskell that allows you to write code in an
+"imperative" fashion, as you might in other languages. Under the hood, `do` is
+actually just using functions (like everything else in Haskell!), but we'll
+gloss over that here and just use it to `do` (sorry) stuff.
+
+So, in the `do`-block for the web server we've started, we define some routes:
+
+```
+get "/greetings/:name" $ do
+  name <- param "name"
+  html $ mconcat ["<h1>Hello, ", name, "!</h1>"]
+```
+
+This is pretty close to e.g. what you'd write in Express:
+
+```
+app.get("/greetings/:name", function (req, res) {
+  var name = req.params.name
+  res.send("<h1>Hello, " + name + "!</h1>");
+});
+```
+
+You can run the `main` function just like any function in GHCi (though it'll run
+"forever" until you abort it with Control-C, since it's a server):
+
+```
+*Main> main
+Setting phasers to stun... (port 6060) (ctrl-c to quit)
+```
+
+If you open
+[http://localhost:6060/greetings/fac](http://localhost:6060/greetings/fac) in a
+web browser you'll see the `Hello, fac!" header printed before you. Nice!
+
+---
+
+**Exercise**:
+
+---
