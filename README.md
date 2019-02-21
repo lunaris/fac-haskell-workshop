@@ -904,3 +904,46 @@ User "root" has been deleted
 ```
 
 ---
+
+It's pretty difficult to build an HTTP API without talking about JSON these
+days, so let's cover that next. First up, let's look at _records_, which are
+Haskell types with named fields:
+
+```
+data Person = MkPerson
+  { name :: String
+  , age  :: Int
+  }
+```
+
+`Person` is a record type which can be built giving the _constructor_ `MkPerson`
+two fields -- a `name`, of type `String`, and an `age`, of type `Int`:
+
+```
+*Main> MkPerson { name = "Joe", age = 30 }
+MkPerson {name = "Joe", age = 31}
+```
+
+Technically you don't need to give the field names (`MkPerson "Joe" 30` would
+work just as well) but they often help readability. Note also that types and
+values have different namespaces in Haskell, so you will often see something
+like:
+
+```
+data Person = Person
+  { name :: String
+  , age  :: Int
+  }
+```
+
+in which the _type_ `Person` has a _constructor_ also named `Person`. This is
+fine, albeit a little confusing at first, especially if you ask GHCi what the
+type of `Person` (formerly `MkPerson`) is:
+
+```
+*Main> :t Person
+Person :: String -> Int -> Person
+```
+
+That is, `Person` (the constructor), takes a `String` (the `name`) and an `Int`
+(the `age`) and gives you a `Person` (the record type we defined).
