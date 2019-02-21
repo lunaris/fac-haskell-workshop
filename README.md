@@ -2,7 +2,7 @@
 
 This repository aims to introduce people to Haskell, a purely functional,
 strongly-typed programming language. It includes a number of exercises,
-beginning with the basis and working up to a small HTTP server with some JSON
+beginning with the basics and working up to a small HTTP server with some JSON
 endpoints.
 
 ## Tools, prerequisites and assumptions
@@ -312,16 +312,16 @@ Ok, one module loaded.
 If there are errors in your code, GHCi will let you know and refuse to reload
 the module until you fix them.
 
-**Exercise**: Write a function `quadratic` which computes the result of quadratic
-polynomials of the form `ax^2 + bx + c`. Your function should take `Int`s
-representing `a`, `b`, `c` and `x` and return the result (also an `Int`). Feel
-free to use the `square` function in your implementation if you wish.
+**Exercise**: Write a function `volume` which computes the volume of a box with
+a given length (`l`), width (`w`) and height (`h`), `l * w * h`. Your function
+should take `Int`s representing `l`, `w`, and `h` and return the result (also an
+`Int`).
 
 ```
-*Main> quadratic 3 4 5 6
-137
-*Main> quadratic 3 2 5 3
-38
+*Main> volume 3 4 5
+60
+*Main> volume 4 4 4
+64
 ```
 
 **Exercise**: Write a function `factorial` which takes an `Int` and computes its
@@ -518,7 +518,7 @@ both `False == True` and `'c' == 'd'` with the same function, for instance. What
 are the types of `(==)` and `(/=)`? What is the name of the constraint required
 to use them?
 
-**Exercise**: Generalise the types of your `factorial` and `quadratic` functions
+**Exercise**: Generalise the types of your `factorial` and `volume` functions
 from earlier. Note that for `factorial` you may need more than one constraint --
 if you get stuck remember that GHCi can help you find the type!
 
@@ -975,10 +975,74 @@ Person :: String -> Int -> Person
 ```
 
 That is, `Person` (the constructor), takes a `String` (the `name`) and an `Int`
-(the `age`) and gives you a `Person` (the record type we defined). We can see
-that the definition of the `Person` record type isn't that far removed from a
-JSON object, and that if we wanted to represent a `Person` as JSON there would
-be a fairly natural choice:
+(the `age`) and gives you a `Person` (the record type we defined).
+
+Accessing the fields of a record can be done in a couple of ways. In a clause,
+you can once again reach for a pattern match:
+
+```
+greetPerson :: Person -> String
+greetPerson (Person { name = n, age = a }) = "Hello, " ++ n
+```
+
+Here, we pattern match on the record by naming the _constructor_, `Person` and
+aliasing the fields. If you're familiar with the ES6 _destructuring_ syntax,
+this is similar:
+
+```
+function greetPerson({ name: n, age: a }) {
+  return "Hello, " + name;
+}
+```
+
+As in ES6 destructuring, we don't have to name all the fields if we don't need
+them all:
+
+```
+greetPerson :: Person -> String
+greetPerson (Person { name = n }) = "Hello, " ++ n
+```
+
+The other option we have is to use _accessor functions_, which GHC generates for
+us when we declare the record:
+
+```
+*Main> :t name
+name :: Person -> String
+*Main> :t age
+age :: Person -> Int
+```
+
+That is, the field names we chose are used to generate functions that fetch
+those fields from a record of the appropriate type. So, we could rewrite
+`greetPerson` as follows:
+
+```
+greetPerson :: Person -> String
+greetPerson p = "Hello, " ++ name p
+```
+
+Depending on the situation, both pattern matching and accessor functions can be
+appropriate.
+
+---
+
+**Exercise**: Write a function `wishHappyBirthday`, that takes a person and
+returns a pair of a message wishing them happy birthday and a new person whose
+age has increased by one year.
+
+```
+*Main> wishHappyBirthday (Person { name = "Joe", age = 30 })
+("Happy birthday Joe!",Person {name = "Joe", age = 31})
+*Main> wishHappyBirthday (Person { name = "Alice", age = 10 })
+("Happy birthday Alice!",Person {name = "Alice", age = 11})
+```
+
+---
+
+We can see that the definition of the `Person` record type isn't that far
+removed from a JSON object, and that if we wanted to represent a `Person` as
+JSON there would be a fairly natural choice:
 
 ```
 {
@@ -1061,3 +1125,79 @@ This takes care of the issue, and also makes sure that we can compare
 ability to have GHC generate all kinds of boring "boilerplate" code like this is
 one of Haskell's killer features and can be seen as some of the "reward" for
 taking the effort to spell out the types.
+
+---
+
+**Exercise**: Add a `GET` endpoint `/languages/favourite` that returns some JSON
+representing your favourite language.
+
+```
+$ curl http://localhost:6060/languages/favourite
+{"name":"Haskell","description":"Definitely my favourite"}
+```
+
+**Exercise**: Write a function, `languageMatches`, that takes a prefix and a
+`Language` and returns `True` if and only if the given language's name begins
+with that prefix. The definition of `Language` in the `Main.hs` file uses the
+`Text` type for `name` and `description`, which functions a lot like the
+`String` type you already know but is more efficient in a variety of scenarios.
+The `Text` type has a function `isPrefixOf` that you might wish to use to write
+this function.
+
+**Exercise**: The `case` expression allows you to pattern match in arbitrary
+expressions. This can save you writing helper functions whenever you want to
+deconstruct a value, or help you avoid repeating yourself in a function with
+lots of clauses:
+
+```
+factorial :: Int -> Int
+factorial n =
+  case n of
+    0 -> 1                      -- factorial 0 = 1
+    m -> m * factorial (m - 1)  -- factorial n = n * factorial (n - 1)
+```
+
+Here, the `case` expression is given a value to "scrutinise" (the "scrutinee")
+and a number of patterns and results. Like `if`-`then`-`else`, it's an
+expression, so always returns a value.
+
+Rewrite `languageMatches` (and any other functions you've written for practice)
+using `case` instead of clause-based pattern matching.
+
+**Exercise**: There are a couple of endpoints already in the module for managing
+a small in-memory database of languages (i.e. recreated every time you reboot
+the server). You can add a language using a `POST` request and view those that
+have been added using a follow-up `GET` request:
+
+```
+$ curl -XPOST -d'{"name":"Haskell","description":"Awesome!"}' http://localhost:6060/languages
+{"name":"Haskell","description":"Awesome!"}
+$ curl -XPOST -d'{"name":"JavaScript","description":"Not too shabby!"}' http://localhost:6060/languages
+{"name":"JavaScript","description":"Not too shabby!"}
+$ curl http://localhost:6060/languages
+[{"name":"Haskell","description":"Awesome!"},{"name":"JavaScript","description":"Not too shabby!"}]
+```
+
+Extend the endpoint so that it can be passed a _query string parameter_, `prefix`,
+that filters the list of languages returned to be those whose names have the given
+value as a prefix:
+
+```
+$ curl http://localhost:6060/languages?prefix=Has
+[{"name":"Haskell","description":"Awesome!"}]
+$ curl http://localhost:6060/languages?prefix=Jav
+[{"name":"JavaScript","description":"Not too shabby!"}]
+$ curl http://localhost:6060/languages?prefix=Elm
+[]
+$ curl http://localhost:6060/languages
+[{"name":"Haskell","description":"Awesome!"},{"name":"JavaScript","description":"Not too shabby!"}]
+```
+
+Along with the `languageMatches` function and some others you have already
+written, you should use the `getParam` function for this, which returns a value of type
+`Maybe Text` -- `Nothing` if the parameter doesn't exist (e.g. the last example
+above, where no prefix is given) and `Just` a value when it is given. You might
+want to use a `case` expression to pattern match on this value and decide what
+to do (e.g. filter the list or return it unmodified).
+
+---
