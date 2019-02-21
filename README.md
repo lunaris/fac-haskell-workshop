@@ -126,13 +126,13 @@ type `(Char, Char, Char)`:
 
 ```
 *Main> ('c', False)
-('c', False)
+('c',False)
 *Main> :t ('c', False)
-('c', False) :: (Char, Bool)
+('c',False) :: (Char, Bool)
 *Main> ('c', 'd', 'e')
-('c', 'd', 'e')
+('c','d','e')
 *Main> :t ('c', 'd', 'e')
-('c', 'd', 'e') :: (Char, Char, Char)
+('c','d','e') :: (Char, Char, Char)
 ```
 
 1-tuples are just ordinary values (`('c')` is simply the character `'c'`). This
@@ -162,9 +162,9 @@ True]` which has the type `[Bool]`, or a list of characters, written `['a', 'b',
 
 ```
 *Main> [False, True]
-[False, True]
+[False,True]
 *Main> :t [False, True]
-[False, True] :: [Bool]
+[False,True] :: [Bool]
 *Main> ['a', 'b', 'c']
 "abc"
 ```
@@ -179,7 +179,7 @@ lists:
 [1,2,3,4,5,6,7,8,9,10]
 ```
 
-### Writing some code: functions
+### Writing some code: simple functions
 
 We saw earlier that `not :: Bool -> Bool`: `not` is a function that takes a
 `Bool` and returns a `Bool`. If you load up the `Main.hs` file in this
@@ -415,6 +415,63 @@ both `False == True` and `'c' == 'd'` with the same function, for instance. What
 are the types of `(==)` and `(/=)`? What is the name of the constraint required
 to use them?
 
+**Exercise**: Generalise the types of your `factorial` and `quadratic` functions
+from earlier. Note that for `factorial` you may need more than one constraint --
+if you get stuck remember that GHCi can help you find the type!
+
+---
+
+### Kicking pattern matching up a notch
+
+While we've introduced tuples and lists, we've not seen how to write functions
+that consume and produce them yet. Let's start with tuples. Here's a function
+that takes a pair of an `Int` and a `Bool` and returns it unmodified:
+
+```
+doNothingPair :: (Int, Bool) -> (Int, Bool)
+doNothingPair p = p
+```
+
+Observe that we can bind a name (here `p`) to a tuple argument just as we could
+an `Int`, `Char` etc. At the type level, you might notice that this function
+does not require that the pair given consists of an `Int` and a `Bool` -- all
+that matters is that the resulting pair has the same type as the input. We can
+generalise the type thus:
+
+```
+doNothingPair :: (a, b) -> (a, b)
+doNothingPair p = p
+```
+
+However, suppose we _do_ want to take a pair where the first element really is
+an `Int`, and we want to increment that `Int`. How do we do it? Well, we can
+pattern match _into_ the tuple:
+
+```
+incrementFst :: (Int, b) -> (Int, b)
+incrementFst (x, y) = (x + 1, y)
+```
+
+To the left of the `=` sign, the _pattern_ `(x, y)` says "match this function's
+argument to a pair of two elements, which we'll call `x` and `y`". To the right
+is the function body, in which we _build a new tuple_ whose elements are `x + 1`
+and `y` unchanged. The _type_ of the function reflects this -- the first element
+must be an `Int`, but the second could be anything so long as that type is
+preserved:
+
+```
+*Main> incrementFst (10, False)
+(11,False)
+*Main> incrementFst (0, 'c')
+(1,'c')
+```
+
+---
+
+**Exercise**: As you now know, it is not only `Int`s that can be incremented.
+Generalise the type of `incrementFst` so that it works on pairs whose first
+element is of _any numeric type_.
+
 **Exercise**: `fst` and `snd` only work on pairs. Write functions `fst3`, `snd3`
 that retrieve the first and second elements of a triple, and functions `thd4`
 and `fth4` that retrieve the third and fourth elements of a 4-tuple. All these
@@ -434,12 +491,80 @@ False
 
 ---
 
+Pattern matching on lists is a bit more involved, since while (for example) a
+pair "always looks like a pair", a list might look like many things. It could be
+empty (`[]`), it could have one element (`[1]`), it could have four elements
+(`"abcd"`), and so on. In reality, Haskell only makes one distinction -- a list
+is either _empty_ or it's an element glued on to the front of another
+(potentially empty) list. The definition of the list type says exactly this
+(albeit in a funny syntax we'll elaborate on below):
 
+```
+data [a]
+  = []
+  | a : [a]
+```
+
+So, a list of values of type `a` (since lists can hold lots of types of values)
+is either empty (represented by the _constructor_ `[]`) or an element of type
+`a` joined to another list of `a`s by the _constructor_ `(:)` (which is
+pronounced "cons", short for list constructor). Up until now we've used some
+syntactic sugar to write lists, but it's time to lift the curtain:
+
+```
+*Main> 1 : 2 : 3 : []
+[1,2,3]
+*Main> []
+[]
+*Main> 'a' : 'b' : []
+"ab"
+*Main> :t False : True : []
+False : True : [] :: [Bool]
+```
+
+All lists are made from the empty list (`[]`, sometimes also called "nil") and
+"consing" on elements with `(:)`. Consequently, _all lists can be pattern
+matched with the same two things_. Let's see how `length` is implemented:
+
+```
+length :: [a] -> Int
+length [] =
+  0
+length (x : xs) =
+  1 + length xs
+```
+
+You can read the first clause as saying "the length of an empty list is zero".
+The second clause should be read a "the length of a non-empty list, where the
+first element (or _head_) is called `x` and the remaining elements (or _tail_)
+are called `xs`, is one plus the length of `xs`". Note that `x` is ignored --
+this is totally fine, but if you want you can make this sort of thing explicit
+by using the "wildcard" pattern:
+
+```
+length (_ : xs) =
+  1 + length xs
+```
+
+Here, we've chosen not to name the head of the list to emphasize that its value
+is not important in computing the length.
+
+We can produce lists in the same manner too -- suppose we want to double every
+`Int` in a list:
+
+```
+doubleAll :: [Int] -> [Int]
+doubleAll [] =
+  []
+doubleAll (x : xs) =
+  (2 * x) : doubleAll xs
+```
 
 ---
 
 **Exercise**: Write a function `null`, which takes a list of values of _any type_
-and returns `True` if and only if the list is empty.
+and returns `True` if and only if the list is empty. As with `length`, there
+will be two cases, but it needn't be a recursive function.
 
 ```
 *Main> null []
@@ -465,9 +590,32 @@ list if it is empty.
 [2,3,4,5,6,7,8,9,10]
 ```
 
+**Exercise**: Write a function `sum`, which takes a list of `Int`s and adds them
+up.
+
+```
+*Main> sum []
+0
+*Main> sum [1..10]
+55
+*Main> sum [-1,1]
+0
+```
+
+**Exercise**: Generalise `sum`'s type so that it works on lists of values of _any
+numeric type_.
+
+**Exercise**: Write a function `fsts`, which takes a list of _pairs_ of any
+types and returns a list of the first elements.
+
+```
+*Main> fsts [('a',1),('b',2),('c',3),('d',4)]
+"abcd"
+```
+
 ---
 
-
+### Higher-order functions and more data types
 
 ---
 
