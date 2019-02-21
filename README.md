@@ -7,8 +7,36 @@ endpoints.
 
 ## Tools, prerequisites and assumptions
 
-* `stack`, a tool for managing and building projects composed of one or more
-  Haskell packages.
+We recommend you use `stack`, a tool for managing and building projects composed
+of one or more Haskell packages, to work through this set of exercises. You can
+install `stack` by running the following command at a terminal:
+
+```
+$ curl -sSL https://get.haskellstack.org/ | sh
+```
+
+Once this has completed, you should be able to see that `stack` has been
+installed:
+
+```
+$ stack --version
+Version X.Y.Z, Git revision SHA ...
+```
+
+With that installed, you can build this repository by running `stack build` in
+the directory you have checked it out to:
+
+```
+$ git clone https://github.com/lunaris/fac-workshop
+...
+$ cd fac-workshop
+$ stack build
+```
+
+This should download the necessary Haskell compiler and associated toolchain and
+also any dependencies that the code in this workshop requires. This can take a
+while the first time you run it so it's recommended that you run this before the
+workshop if you can. With that done you should be good to go!
 
 ## Exercises
 
@@ -906,7 +934,7 @@ User "root" has been deleted
 ---
 
 It's pretty difficult to build an HTTP API without talking about JSON these
-days, so let's cover that next. First up, let's look at _records_, which are
+days, so we'll cover that next. First up, let's look at _records_, which are
 Haskell types with named fields:
 
 ```
@@ -916,12 +944,13 @@ data Person = MkPerson
   }
 ```
 
-`Person` is a record type which can be built giving the _constructor_ `MkPerson`
-two fields -- a `name`, of type `String`, and an `age`, of type `Int`:
+`Person` is a record type which can be built by giving the _constructor_
+`MkPerson` two fields -- a `name`, of type `String`, and an `age`, of type
+`Int`:
 
 ```
 *Main> MkPerson { name = "Joe", age = 30 }
-MkPerson {name = "Joe", age = 31}
+MkPerson {name = "Joe", age = 30}
 ```
 
 Technically you don't need to give the field names (`MkPerson "Joe" 30` would
@@ -946,4 +975,89 @@ Person :: String -> Int -> Person
 ```
 
 That is, `Person` (the constructor), takes a `String` (the `name`) and an `Int`
-(the `age`) and gives you a `Person` (the record type we defined).
+(the `age`) and gives you a `Person` (the record type we defined). We can see
+that the definition of the `Person` record type isn't that far removed from a
+JSON object, and that if we wanted to represent a `Person` as JSON there would
+be a fairly natural choice:
+
+```
+{
+  "name": "Joe",
+  "age": 30
+}
+```
+
+This goes for other records too -- suppose we define a record to represent
+programming languages:
+
+```
+data Language = Language
+  { name        :: String
+  , description :: String
+  }
+```
+
+We might build values like:
+
+```
+*Main> Language { name = "Haskell", description = "Awesome!" }
+Language {name = "Haskell", description = "Awesome!"}
+*Main> Language { name = "JavaScript", description = "Not too shabby!" }
+Language {name = "JavaScript", description = "Not too shabby!"}
+```
+
+and expect JSON like:
+
+```
+{ "name": "Haskell", "description": "Awesome!" }
+{ "name": "JavaScript", "description": "Not too shabby!" }
+```
+
+It seems therefore that serialising to and deserialising from JSON is a
+capability we might apply to multiple types. As with numbers and equality, the
+solution Scotty uses in this case is a pair of constraints, `ToJSON` and
+`FromJSON`, along with functions like:
+
+```
+json :: ToJSON a => a -> ...
+```
+
+which takes a value of _any type whose values can be serialised to JSON_ and
+sends that value as the response to a request. So, in Express, you might do:
+
+```
+res.send({
+  "name": "Haskell",
+  "description": "Awesome!"
+});
+```
+
+With the `json` function, Scotty allows you to do something similar:
+
+```
+json (Language {
+  name = "Haskell",
+  description = "Awesome!"
+})
+```
+
+One gotcha is that, in order to make this work, we have to tell Haskell that
+e.g. `Language` and `Person` are types that satisfy the `ToJSON` and `FromJSON`
+constraints (alternatively, are members of the `ToJSON` and `FromJSON` _type
+classes_). Fortunately, there are a bunch of mechanisms in Haskell that can be
+combined to make GHC write this code itself, through a so-called `deriving`
+clause:
+
+```
+data Language = Language
+  { name        :: Name
+  , description :: Description
+  }
+  deriving (Eq, Ae.FromJSON, Generic, Show, Ae.ToJSON)
+```
+
+This takes care of the issue, and also makes sure that we can compare
+`Language`s (through `Eq`) and print them out in GHCi (through `Show`). The
+ability to have GHC generate all kinds of boring "boilerplate" code like this is
+one of Haskell's killer features and can be seen as some of the "reward" for
+taking the effort to spell out the types.
