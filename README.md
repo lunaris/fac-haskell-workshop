@@ -882,6 +882,25 @@ web browser you'll see the `Hello, fac!" header printed before you. Nice!
 
 ---
 
-**Exercise**:
+**Exercise**: Add a `GET` endpoint, `/formal-greetings/...`, that takes two
+parameters, a forename and a surname (say) and produces some HTML greeting the
+user formally, e.g.:
+
+```
+$ curl http://localhost:6060/formal-greetings/Joe/Bloggs
+<h1>Good day, Joe Bloggs!</h1>
+```
+
+It may help to know that `mconcat` will concatenate an arbitrary list of textual
+values.
+
+**Exercise**: As in Express, there are other HTTP verbs you can play with too.
+Write a `DELETE` endpoint, `/users/...` that takes a username and confirms that
+it has been deleted, e.g.:
+
+```
+$ curl -XDELETE http://localhost:6060/users/root
+User "root" has been deleted
+```
 
 ---
