@@ -142,13 +142,7 @@ main = do
 
     get "/languages" $ do
       allLangs <- getLanguages db
-      maybePrefix <- getParam "prefix"
-      let preprocess = case maybePrefix of
-            Nothing ->
-              id
-            Just prefix ->
-              filter (languageMatches prefix)
-      json (preprocess allLangs)
+      json allLangs
 
     post "/languages" $ do
       lang <- jsonData
@@ -163,7 +157,14 @@ data Language = Language
 
 type Name        = T.Text
 type Description = T.Text
-type Database    = IORef (M.Map T.Text Language)
+
+-------------------------------------------------------------------------------
+
+-- Feel free to ignore (in the first instance, and perhaps tinker with in the
+-- second) everything below this line.
+
+type Database
+  = IORef (M.Map T.Text Language)
 
 newDatabase :: MonadIO m => m Database
 newDatabase =
