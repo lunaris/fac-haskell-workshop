@@ -75,6 +75,17 @@ True
 True
 ```
 
+Haskell has `if`-`then`-`else` too, but since everything is an expression, `if`
+returns values and you must always provide an `else` (this is a bit like the
+ternary/"Elvis" operator in JavaScript -- `p ? t : f` or `?:`):
+
+```
+*Main> if True then 'a' else 'b'
+'a'
+*Main> if 42 > 3 then 3 * 4 else 4 * 5
+12
+```
+
 Note that function application is achieved by _juxtaposition_ -- the expression
 `f x` applies the function `f` to the argument `x`. There is no need for
 parentheses as in e.g. JavaScript (e.g. `f(x)`). Note that writing e.g. `not
@@ -303,6 +314,70 @@ Thus `factorial n` == `n * (n - 1) * (n - 2) * ... * 1` -- `factorial 3 == 6`,
 *Main> factorial 0
 1
 ```
+
+---
+
+If, when writing `factorial`, you _are_ worried about negative inputs, you can
+use _guards_ to defend your function clauses against arbitrary predicates. For
+instance, here's a function that doubles positive numbers and returns zero in
+all other cases:
+
+```
+doublePositive :: Int -> Int
+doublePositive x
+  | x > 0     = 2 * x
+  | otherwise = 0
+```
+
+Each guard is defined using the `|` symbol and some boolean. If that boolean
+evaluates to `True`, that guard's body will be evaluated. If it's `False`, the
+next guard or clause will be tried. `otherwise` isn't a special keyword but just
+a nicety for `True`:
+
+```
+otherwise :: Bool
+otherwise = True
+```
+
+While they behave similarly to `if`-`then`-`else` expressions, guards have a
+slightly different purpose (selecting whether or not a clause should be
+evaluated).
+
+---
+
+**Exercise**: Using guards, write a function `doubleEven` that doubles
+event `Int`s and returns odd `Int`s unchanged.
+
+```
+*Main> doubleEven 3
+3
+*Main> doubleEven 14
+28
+```
+
+**Exercise**: Rewrite `doubleEven` using an `if`-`then`-`else` expression and
+compare the two approaches.
+
+**Exercise**: Using guards, write an extended version of `doubleEven`,
+`weirdMaths`, that implements the following rules:
+
+* Even numbers are doubled
+* Negative odd numbers are made positive
+* Positive odd numbers are incremented to the next even number.
+
+```
+*Main> weirdMaths 42
+84
+*Main> weirdMaths (-3)
+3
+*Main> weirdMaths 0
+0
+*Main> weirdMaths 39
+40
+```
+
+You may wish to implement this with `if` too and (hopefully) observe that guards
+offer a slightly cleaner expression.
 
 ---
 
@@ -617,6 +692,115 @@ types and returns a list of the first elements.
 
 ### Higher-order functions and more data types
 
+Recall that earlier we finally saw how the list data type is _defined_:
+
+```
+data [a]
+  = []
+  | a : [a]
+```
+
+Other types can be defined in the same manner. For instance values of type
+`Maybe a` _might_ be present (in which we find `Just` some value), or might be
+absent (in which case find `Nothing`):
+
+```
+data Maybe a
+  = Nothing
+  | Just a
+```
+
+So valid values of type `Maybe Bool` are `Nothing`, `Just False` and `Just
+True`. `Just 'c'` is a `Maybe Char`, `Nothing` is a `Maybe a` (for _any_ `a`)
+and `Just "hello"` is a `Maybe String`. Pattern matching and construction work
+as they do for lists; here's a function that adds three to an `Int` if it's
+`Just` there:
+
+```
+maybeAddThree :: Maybe Int -> Maybe Int
+maybeAddThree Nothing =
+  Nothing
+maybeAddThree (Just x) =
+  Just (x + 3)
+```
+
+---
+
+**Exercise**: Write a function `safeHead` that takes a list of any type and
+returns `Just` the head if it exists and `Nothing` if the list is empty.
+
+**Exercise**: Write a function `maybeLength` that accepts a `Maybe String` and
+returns the length of that string if it's present and `0` if it's not.
+
+**Exercise**: Write a function `lookup` that takes a _key_ of some type `a` and
+a list of _key-value pairs_ and returns `Just` the first value whose key matches
+that given if it exists and `Nothing` otherwise. Note that the type `a` will
+need a constraint, since you'll need to be able to check whether the key you're
+given is _equal_ to each key in the list. Note that both guards and
+`if`-`then`-`else` will work fine for comparing each key.
+
+---
+
+If you haven't tried/stumbled upon it already, observe that `Just not` is a
+perfectly fine value. You can't print it (functions can't generally be printed
+in Haskell), but it has a valid type:
+
+```
+*Main> :t Just not
+Just not :: Maybe (Bool -> Bool)
+```
+
+Indeed, functions are _entirely first-class_ in Haskell -- pass them as
+arguments, stick them in lists; anything you can do with an `Int` you can
+probably do with a function. This turns out to be _immensely_ powerful. Recall
+the `doubleAll` function from earlier:
+
+```
+doubleAll :: [Int] -> [Int]
+doubleAll [] =
+  []
+doubleAll (x : xs) =
+  (2 * x) : doubleAll xs
+```
+
+We can generalise this so that it takes _any function that takes an `Int` and
+returns an `Int`_ and applies that instead:
+
+```
+mapInts :: (Int -> Int) -> [Int] -> [Int]
+mapInts f [] =
+  []
+mapInts f (x : xs) =
+  f x : mapInts f xs
+```
+
+In fact, we can go further and produce `map`, which works like `map` in
+JavaScript:
+
+```
+map :: (a -> b) -> [a] -> [b]
+map f [] =
+  []
+map f (x : xs) =
+  f x : map f xs
+```
+
+`map` takes a function that turns `a`s into `b`s, along with a list of `a`s and
+gives you a list of `b`s by applying that function to every element. Thus
+`doubleAll` could become:
+
+```
+doubleAll :: [Int] -> [Int]
+doubleAll xs = map (2 *) xs
+```
+
+Or even, since functions are first-class (!):
+
+```
+doubleAll :: [Int] -> [Int]
+doubleAll = map (2 *)
+```
+
 ---
 
 **Exercise**: Write a function `filter`, which takes a predicate over some type
@@ -630,4 +814,19 @@ that predicate.
 [5,9,6]
 ```
 
+**Exercise**: Write a function `find`, which takes a predicate over some type
+and a list of values of that type and returns `Just` the first element that
+satisfies the predicate or `Nothing` if no element satisfies it.
+
+```
+*Main> find even [1,2,3,4]
+Just 2
+*Main> find odd [2,4..10]
+Nothing
+*Main> find (> 2) []
+Nothing
+```
+
 ---
+
+### Something more real-world
