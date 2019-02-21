@@ -11,5 +11,7 @@ executable          fac-workshop
     build-depends:  aeson
                   , base
                   , containers
+                  , ekg
                   , scotty
                   , text
+                  , wai-middleware-metrics

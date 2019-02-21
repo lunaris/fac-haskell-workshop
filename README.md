@@ -1201,3 +1201,11 @@ want to use a `case` expression to pattern match on this value and decide what
 to do (e.g. filter the list or return it unmodified).
 
 ---
+
+### Release the hounds
+
+At this point the workshop becomes a little open ended -- feel free to tinker
+with the code however you wish! That said, if you'd like some ideas, here are a
+few:
+
+* Monitoring and metrics

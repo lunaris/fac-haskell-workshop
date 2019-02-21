@@ -9,7 +9,9 @@ import qualified Data.Map as M
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as T.L
 import GHC.Generics
+import qualified Network.Wai.Metrics as Monitoring.HTTP
 import Prelude hiding (filter, lookup, not, null, tail)
+import qualified System.Remote.Monitoring as Monitoring
 import Web.Scotty
 
 not :: Bool -> Bool
@@ -119,9 +121,15 @@ languageMatches = undefined
 
 main :: IO ()
 main = do
+  metricServer <- Monitoring.forkServer "localhost" 7070
+  let metricStore = Monitoring.serverMetricStore metricServer
+  httpMetrics <- Monitoring.HTTP.registerWaiMetrics metricStore
+
   db <- newDatabase
 
   scotty 6060 $ do
+    middleware (Monitoring.HTTP.metrics httpMetrics)
+
     get "/greetings/:name" $ do
       name <- param "name"
       html $ mconcat ["<h1>Hello, ", name, "!</h1>"]
