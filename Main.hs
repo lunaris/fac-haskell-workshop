@@ -12,91 +12,110 @@ import GHC.Generics
 import Prelude hiding (filter, lookup, not, null, tail)
 import Web.Scotty
 
---  Exercise: fire up the REPL, play with some basic bits:
---    Arithmetic: 2, 2 + 5, 3 * 4, 4 * (5 + 3)
---      Precedence, etc.
---    Booleans: True, False, not True
---      Predicates and logical operators: even 2, 3 > 1, odd 5 && even 2
---      Talk about Eq and Ord
---      Even and odd are functions -- talk about juxtaposition as application
---    Characters and strings: 'c', "hello"
---      Unlike JS, quotes are important
---    Tuples: ('c', False), (False, 1, True)
---      fst, snd
---      Don't confuse passing a tuple with calling an n-argument function
---    Lists: [], [1,2,3], [1..10]
---      Superficially similar to JavaScript's arrays, but not the same
---      Functions that work on lists: length
---
---    Come out comfortable with function application, operators, basic types
---  Exercise: write a quadratic evaluator
---    Int -> Int -> Int
---    Can we do Float -> Float -> Float
---    Can we do any number? Num a => a -> a -> a
---  Exercise: write factorial
---    Come out comfortable with recursion
---  Exercise: write null, tail
---    Come out comfortable with pattern matching on lists
---  Exercise: write fst3, snd3, thd4, fth4
---    Come out comfortable with pattern matching on tuples
---  Exercise: write filter
---    Let's just get the even numbers out
---  Exercise: write lookup
---    Now you only want _one_, but what if it's not there -- introduce Maybe,
---    Just, Nothing
---  Exercise: write languageMatches
---  Exercise: introduce filter into GET /languages
-
 not :: Bool -> Bool
 not False = True
 not True  = False
 
-quadratic :: Int -> Int -> Int -> Int -> Int
-quadratic a b c x =
-  a * x * x + b * x + c
+-- Exercise: Write square
 
-factorial :: Int -> Int
-factorial 0 =
-  1
-factorial n =
-  n * factorial (n - 1)
+square = undefined
 
-null :: [a] -> Bool
-null [] =
-  True
-null (x : xs) =
-  False
+-- Exercise: Write volume
 
-tail :: [a] -> [a]
-tail (x : xs) =
-  xs
-tail [] =
-  []
+volume = undefined
 
-fst3 :: (a, b, c) -> a
-fst3 (a, b, c) = a
+-- Exercise: Write factorial
 
-snd3 :: (a, b, c) -> b
-snd3 (a, b, c) = b
+factorial = undefined
 
-thd4 :: (a, b, c, d) -> c
-thd4 (a, b, c, d) = c
+-------------------------------------------------------------------------------
 
-fth4 :: (a, b, c, d) -> d
-fth4 (_, _, _, d) = d
+-- Exercise: Write doubleEven (with guards, with if-then-else)
 
-filter :: (a -> Bool) -> [a] -> [a]
-filter p [] =
-  []
-filter p (x : xs) =
-  if p x then x : filter p xs else filter p xs
+doubleEven = undefined
 
-lookup :: Eq a => a -> [(a, b)] -> Maybe b
-lookup k [] =
-  Nothing
-lookup k ((k', v) : ps)
-  | k == k'   = Just v
-  | otherwise = lookup k ps
+-- Exercise: Write weirdMaths
+
+weirdMaths = undefined
+
+-------------------------------------------------------------------------------
+
+-- Exercise: (REPL) (==) and (/=)
+
+-- Exercise: Generalise the types of factorial and volume
+
+-------------------------------------------------------------------------------
+
+-- Exercise: Generalise the type of incrementFst
+
+incrementFst = undefined
+
+-- Exercise: Write fst3, snd3, thd4, fth4
+
+fst3 = undefined
+snd3 = undefined
+thd4 = undefined
+fth4 = undefined
+
+-------------------------------------------------------------------------------
+
+-- Exercise: Write null
+
+null = undefined
+
+-- Exercise: Write tail
+
+tail = undefined
+
+-- Exercise: Write sum
+
+sum = undefined
+
+-- Exercise: Generalise the type of sum
+
+-- Exercise: Write fsts
+
+fsts = undefined
+
+-------------------------------------------------------------------------------
+
+-- Exercise: Write safeHead
+
+safeHead = undefined
+
+-- Exercise: Write maybeLength
+
+maybeLength = undefined
+
+-- Exercise: Write lookup
+
+lookup = undefined
+
+-------------------------------------------------------------------------------
+
+-- Exercise: Write filter
+
+filter = undefined
+
+-- Exercise: Write find
+
+find = undefined
+
+-------------------------------------------------------------------------------
+
+-- Exercise: Write wishHappyBirthday
+
+wishHappyBirthday = undefined
+
+-------------------------------------------------------------------------------
+
+-- Exercise: Write languageMatches
+
+languageMatches = undefined
+
+-- Exercise: Rewrite languageMatches using case
+
+-------------------------------------------------------------------------------
 
 main :: IO ()
 main = do
@@ -106,6 +125,20 @@ main = do
     get "/greetings/:name" $ do
       name <- param "name"
       html $ mconcat ["<h1>Hello, ", name, "!</h1>"]
+
+    ---------------------------------------------------------------------------
+
+    -- Feel free to add endpoints here!
+
+    -- Exercise: Add GET /formal-greetings/...
+
+    -- Exercise: Add DELETE /users/...
+
+    -- Exercise: Add GET /languages/favourite
+
+    -- Exercise: Add query-string support to GET /languages
+
+    ---------------------------------------------------------------------------
 
     get "/languages" $ do
       allLangs <- getLanguages db
@@ -121,10 +154,6 @@ main = do
       lang <- jsonData
       insertLanguage lang db
       json lang
-
-languageMatches :: T.Text -> Language -> Bool
-languageMatches prefix lang =
-  prefix `T.isPrefixOf` name lang
 
 data Language = Language
   { name        :: Name
