@@ -27,9 +27,9 @@ With that installed, you can build this repository by running `stack build` in
 the directory you have checked it out to:
 
 ```
-$ git clone https://github.com/lunaris/fac-workshop
+$ git clone https://github.com/lunaris/fac-haskell-workshop
 ...
-$ cd fac-workshop
+$ cd fac-haskell-workshop
 $ stack build
 ```
 
