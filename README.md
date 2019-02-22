@@ -141,7 +141,7 @@ for `:type`, which will also work), to reveal the type of any expression:
 *Main> :t 'c'
 'c' :: Char
 *Main> :t not (even 2)
-not (even 3) :: Bool
+not (even 2) :: Bool
 ```
 
 You can read the double colon, `::`, as "has the type". So the character `'c'`
