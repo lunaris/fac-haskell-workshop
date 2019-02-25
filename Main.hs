@@ -10,7 +10,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as T.L
 import GHC.Generics
 import qualified Network.Wai.Metrics as Monitoring.HTTP
-import Prelude hiding (filter, lookup, not, null, tail)
+import Prelude hiding (filter, lookup, not, null, sum, tail)
 import qualified System.Remote.Monitoring as Monitoring
 import Web.Scotty
 
